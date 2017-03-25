@@ -1,51 +1,30 @@
 <html>
 	<head>
 		<title>Заказ</title>
-		<style type="text/css">
-.tab_name
-{
-	padding-right:20px;
-	font-style:italic;
-}
-.tab_name a
-{
-	color:#ff0000;
-}
-#tabs div 
-{
-	padding:0 10px 0 0;
-	float:left;
-	clear:none;
-}
-#list div
-{
-	
-}
-		</style>
+		<link rel="stylesheet" type="text/css" href="/styles.css" />
 	</head>
 	
 	<body>
 <?php
 include 'header.php';
-require 'db.php';
 
 $key_order = false;
 if(isset($_GET['key_order'])) $key_order=$_GET['key_order'];
 else if(isset($_POST['key_order'])) $key_order = $_POST['key_order'];
 
 $key_detail_values = '';
-$q = mysql_query ('SELECT key_detail, name_detail FROM detail ORDER BY name_detail');
-while ($r = mysql_fetch_row ($q))
+$q = mysql_query('SELECT key_detail, name_detail FROM detail ORDER BY name_detail');
+while($r = mysql_fetch_row($q))
 {
-	list ($d_id, $d_name) = $r;
+	list($d_id, $d_name) = $r;
 	$key_detail_values .= '<option value="'.$d_id.'">'.$d_name.'</option>';
 }
 
 $clients = '';
 $q = mysql_query ('SELECT key_client, full_name FROM client ORDER BY full_name');
-while ($r = mysql_fetch_row ($q))
+while($r = mysql_fetch_row ($q))
 {
-	list ($d_id, $d_name) = $r;
+	list($d_id, $d_name) = $r;
 	$clients .= '<option value="'.$d_id.'">'.$d_name.'</option>';
 }
 
@@ -67,31 +46,33 @@ if(isset($_POST['order_number']))
 	if(!$date) $error = 'Дата';
 	if(!$order_number) $error = 'Номер заказа';
 	
-	
-	if(!$key_order)
+	if(!$error)
 	{
-		$sql = "INSERT INTO order_product(order_number, `date`, sum, key_client) VALUES(".$order_number.", '".$date."', ".$sum.", ".$client.")";
-		mysql_query($sql) or die(mysql_error());
-		$id = mysql_insert_id();
-	
-		$sql = "INSERT INTO detail_order_product(key_detail, key_order) VALUES";
-
-		for($i = 0; $i < count($key_detail); ++$i)
+		if(!$key_order)
 		{
-			$sql .= '('.$key_detail[$i].', '.$id.')';
-			if($i < (count($key_detail)-1)) $sql .= ', ';
-		}
-		
-		mysql_query($sql) or die(mysql_error());
+			$sql = "INSERT INTO order_product(order_number, `date`, sum, key_client) VALUES(".$order_number.", '".$date."', ".$sum.", ".$client.")";
+			mysql_query($sql) or die(mysql_error());
+			$id = mysql_insert_id();
+	
+			$sql = "INSERT INTO detail_order_product(key_detail, key_order) VALUES";
 
-		header('Location: /order_product.html');
-		return;
-	}
-	else
-	{
-		$sql = "UPDATE `order_product` SET `order_number`='".$_POST['order_number']."', `date`='".$_POST['date']."', `sum`='".$_POST['sum']."', `key_client`=".$_POST['key_client']." WHERE `key_order`=".$key_order;
-		//echo "sql = ".$sql."<br/>";
-		@mysql_query($sql);
+			for($i = 0; $i < count($key_detail); ++$i)
+			{
+				$sql .= '('.$key_detail[$i].', '.$id.')';
+				if($i < (count($key_detail)-1)) $sql .= ', ';
+			}
+		
+			mysql_query($sql) or die(mysql_error());
+
+			header('Location: /order_product.html');
+			return;
+		}
+		else
+		{
+			$sql = "UPDATE `order_product` SET `order_number`='".$_POST['order_number']."', `date`='".$_POST['date']."', `sum`='".$_POST['sum']."', `key_client`=".$_POST['key_client']." WHERE `key_order`=".$key_order;
+			//echo "sql = ".$sql."<br/>";
+			mysql_query($sql);
+		}
 	}
 	
 }

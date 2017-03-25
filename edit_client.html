@@ -1,33 +1,12 @@
 <html>
 	<head>
 		<title>Информация о клиенте</title>
-		<style type="text/css">
-.tab_name
-{
-	padding-right:20px;
-	font-style:italic;
-}
-.tab_name a
-{
-	color:#ff0000;
-}
-#tabs div 
-{
-	padding:0 10px 0 0;
-	float:left;
-	clear:none;
-}
-#list div
-{
-	
-}
-		</style>
+		<link rel="stylesheet" type="text/css" href="/styles.css" />
 	</head>
 	
 	<body>
 <?php
 include 'header.php';
-require 'db.php';
 
 $key_client = false;
 if(isset($_GET['key_client'])) $key_client=$_GET['key_client'];
@@ -105,5 +84,5 @@ echo '
 	</body>
 </html>';
 
-@mysql_close($handler);
+mysql_close($handler);
 ?>

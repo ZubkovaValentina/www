@@ -1,33 +1,12 @@
 <html>
 	<head>
 		<title>Заказ</title>
-		<style type="text/css">
-.tab_name
-{
-	padding-right:20px;
-	font-style:italic;
-}
-.tab_name a
-{
-	color:#ff0000;
-}
-#tabs div 
-{
-	padding:0 10px 0 0;
-	float:left;
-	clear:none;
-}
-#list div
-{
-	
-}
-		</style>
+		<link rel="stylesheet" type="text/css" href="/styles.css" />
 	</head>
 	
 	<body>
 <?php
 include 'header.php';
-require 'db.php';
 
 $key_order = false;
 if(isset($_GET['del']))
@@ -39,8 +18,8 @@ if(isset($_GET['del']))
 }
 
 
-$nr = @mysql_query("SELECT `key_order`, `order_number`, `date`, `sum`, `key_client` FROM `order_product`");
-$num = @mysql_num_rows($nr);
+$nr = mysql_query("SELECT `key_order`, `order_number`, `date`, `sum`, `key_client` FROM `order_product`");
+$num = mysql_num_rows($nr);
   
 ?>
 		<br />
