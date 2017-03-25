@@ -1,0 +1,149 @@
+<html>
+	<head>
+		<title>Информация о сотруднике</title>
+		<style type="text/css">
+.tab_name
+{
+	padding-right:20px;
+	font-style:italic;
+}
+.tab_name a
+{
+	color:#ff0000;
+}
+#tabs div 
+{
+	padding:0 10px 0 0;
+	float:left;
+	clear:none;
+}
+#list div
+{
+	
+}
+		</style>
+	</head>
+	
+	<body>
+<?php
+include 'header.php';
+require 'db.php';
+
+$key_employee = false;
+if(isset($_GET['key_employee'])) $key_employee=$_GET['key_employee'];
+else if(isset($_POST['key_employee'])) $key_employee = $_POST['key_employee'];
+
+$error = false;
+$sql = "";
+if(isset($_POST['full_name']))
+{
+	$full_name = $_POST['full_name'];
+	$INN = $_POST['INN'];
+	$Position = $_POST['Position'];
+	$birthday = $_POST['birthday'];
+	$children = $_POST['children'];
+	$education = $_POST['education'];
+	$sex = $_POST['sex'];
+	
+	if(!$full_name) $error = 'ФИО сотрудника';
+	if(!$INN) $error = 'ИНН';
+	if(!$Position) $error = 'Должность';
+	if(!$birthday) $error = 'День рождения';
+	if(!$children) $error = 'Количество детей';
+	if(!$education) $error = 'Образование';
+	if(!$sex) $error = 'Пол';
+	
+
+	if(!$key_employee)
+	{
+		$sql = "INSERT INTO `employee`(`full_name`, `INN`, `Position` , `birthday` , `children`, `education` , `sex`) VALUES('".$_POST['full_name']."', '".$_POST['INN']."', ".$_POST['Position']."' , ".$_POST['birthday']."', ".$_POST['children']."', ".$_POST['education']."', ".$_POST['sex'].")";
+		@mysql_query($sql);
+		//echo "sql = ".$sql."<br/>";
+		header('Location: /employee.html');
+		return;
+	}
+	else
+	{
+		$sql = "UPDATE `employee` SET `full_name`='".$_POST['full_name']."', `INN`='".$_POST['INN']."', `Position`=".$_POST['Position']."' , `birthday`='".$_POST['birthday']."', `children`='".$_POST['children']."', `education`='".$_POST['education']."', `sex`='".$_POST['sex']."  WHERE `key_employee`=".$key_employee;
+		//echo "sql = ".$sql."<br/>";
+		@mysql_query($sql);
+	}
+}
+
+
+
+//echo "id = ".$key_employee."<br/>";
+
+$nr = @mysql_query("SELECT `full_name`, `INN`, `Position`, `birthday`, `children`, `education`, `sex` FROM `employee` WHERE `key_employee`=".$key_employee);
+if(count($nr) > 0)
+{
+	list($full_name, $INN, $Position, $birthday, $children, $education, $sex) =	@mysql_fetch_row($nr);
+}
+
+echo '
+		<br />';
+if(!$key_employee) echo "<h3>Добавить сотрудника</h3>";
+else echo "<h3>Редактировать сотрудника</h3>";
+
+echo '
+		<form method="POST" action="/edit_employee.html">
+			<table td="tab">
+				<tr>
+					<td class="tab_name">ФИО</td>
+					<td><input type="text" name="full_name" value="'.$full_name.'" /></td>
+				</tr>
+				
+				<tr>
+					<td  class="tab_name">ИНН</td>
+					<td><input type="text" name="INN" value="'.$INN.'" /></td>
+				</tr>
+				
+			
+				<tr>
+					<td class="tab_name">Должность сотрудника</td>
+					<td><input type="text" name="Position" value="'.$Position.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">День рождения</td>
+					<td><input type="text" name="birthday" value="'.$birthday.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Количество детей</td>
+					<td><input type="text" name="children" value="'.$children.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Образование</td>
+					<td><input type="text" name="education" value="'.$education.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Пол</td>
+					<td><input type="text" name="sex" value="'.$sex.'" /></td>
+				</tr>';
+										
+if($error) echo '		
+				<tr>
+					<td colspan="2" style="color:#ff0000;font-style:bold;padding-top:16px;">Не заполнено обязательное поле "'.$error.'"!</td>
+				</tr>';
+echo '				
+				<tr>
+					<td colspan="2" align="center" style="padding-top:20px;">
+						<input type="submit" name="submit" value="';
+								
+if(!$key_employee) echo "Добавить";
+else echo "Сохранить";
+echo '" />';
+if($key_employee) echo '<input type="hidden" name="key_employee" value="'.$key_employee.'" />';
+echo '
+					</td>
+				</tr>
+			</table>
+		</form>
+	</body>
+</html>';
+
+@mysql_close($handler);
+?>

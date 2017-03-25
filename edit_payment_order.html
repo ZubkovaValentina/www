@@ -1,0 +1,114 @@
+<html>
+	<head>
+		<title>Платежные поручения</title>
+		<style type="text/css">
+.tab_name
+{
+	padding-right:20px;
+	font-style:italic;
+}
+.tab_name a
+{
+	color:#ff0000;
+}
+#tabs div 
+{
+	padding:0 10px 0 0;
+	float:left;
+	clear:none;
+}
+#list div
+{
+	
+}
+		</style>
+	</head>
+	
+	<body>
+<?php
+include 'header.php';
+require 'db.php';
+
+$key_payment = false;
+if(isset($_GET['key_payment'])) $key_payment=$_GET['key_payment'];
+else if(isset($_POST['key_payment'])) $key_payment = $_POST['key_payment'];
+
+$sql = "";
+if(isset($_POST['payment_number']))
+{
+	if(!$key_payment)
+	{
+		$sql = "INSERT INTO `payment_order`(`payment_number`, `date`, `detail`, `kolvo`, `sum`) VALUES('".$_POST['payment_number']."', '".$_POST['date']."', '".$_POST['detail']."', '".$_POST['kolvo']."', ".$_POST['sum'].")";
+		@mysql_query($sql);
+		//echo "sql = ".$sql."<br/>";
+		header('Location: /payment_order.html');
+		return;
+	}
+	else
+	{
+		$sql = "UPDATE `payment_order` SET `payment_number`='".$_POST['payment_number']."', `date`='".$_POST['date']."', , `detail`='".$_POST['detail']."',, `kolvo`='".$_POST['kolvo']."',`sum`=".$_POST['sum']." WHERE `key_payment`=".$key_payment;
+		//echo "sql = ".$sql."<br/>";
+		@mysql_query($sql);
+	}
+}
+
+
+
+//echo "id = ".$key_payment."<br/>";
+
+$nr = @mysql_query("SELECT `payment_number`, `date`, `detail`, `kolvo`, `sum` FROM `payment_number` WHERE `key_payment`=".$key_payment);
+if(count($nr) > 0)
+{
+	list($payment_number,  $date, $detail, $kolvo, $sum) =	@mysql_fetch_row($nr);
+}
+
+echo '
+		<br />';
+if(!$key_payment) echo "<h3>Добавить поручение</h3>";
+else echo "<h3>Редактировать поручение</h3>";
+
+echo '
+		<form method="POST" action="/edit_payment_order.html">
+			<table td="tab">
+				<tr>
+					<td class="tab_name">Номер Поручения</td>
+					<td><input type="text" name="payment_number" value="'.$payment_number.'" /></td>
+				</tr>
+				
+				<tr>
+					<td  class="tab_name">Дата платежа</td>
+					<td><input type="text" name="date" value="'.$date.'" /></td>
+				</tr>
+				
+				
+				<tr>
+					<td class="tab_name">Товар</td>
+					<td><input type="text" name="detail" value="'.$detail.'" /></td>
+				</tr>
+				<tr>
+					<td class="tab_name">Количество</td>
+					<td><input type="text" name="kolvo" value="'.$kolvo.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Сумма</td>
+					<td><input type="text" name="sum" value="'.$sum.'" /></td>
+				</tr>
+				
+				<tr>
+					<td colspan="2" align="center" style="padding-top:20px;">
+						<input type="submit" name="submit" value="';
+if(!$key_payment) echo "Добавить";
+else echo "Сохранить";
+echo '" />';
+if($key_payment) echo '<input type="hidden" name="key_payment" value="'.$key_payment.'" />';
+echo '
+					</td>
+				</tr>
+			</table>
+		</form>
+	</body>
+</html>';
+
+@mysql_close($handler);
+?>

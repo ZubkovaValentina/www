@@ -1,0 +1,126 @@
+<html>
+	<head>
+		<title>Детали</title>
+		<style type="text/css">
+.tab_name
+{
+	padding-right:20px;
+	font-style:italic;
+}
+.tab_name a
+{
+	color:#ff0000;
+}
+#tabs div 
+{
+	padding:0 10px 0 0;
+	float:left;
+	clear:none;
+}
+#list div
+{
+	
+}
+		</style>
+	</head>
+	
+	<body>
+<?php
+include 'header.php';
+require 'db.php';
+
+$key_detail = false;
+if(isset($_GET['key_detail'])) $key_detail=$_GET['key_detail'];
+else if(isset($_POST['key_detail'])) $key_detail = $_POST['key_detail'];
+
+$sql = "";
+if(isset($_POST['name_detail']))
+{
+	if(!$key_detail)
+	{
+		$sql = "INSERT INTO `detail`(`name_detail`, `manufacturer`, `car_model`, `power`, `sum_detail`, `kolvo`, `couple_number`) VALUES('".$_POST['name_detail']."', '".$_POST['manufacturer']."', '".$_POST['car_model']."', '".$_POST['power']."', '".$_POST['sum_detail']."', '".$_POST['kolvo']."', ".$_POST['couple_number'].")";
+		@mysql_query($sql);
+		//echo "sql = ".$sql."<br/>";
+		header('Location: /detail.html');
+		return;
+	}
+	else
+	{
+		$sql = "UPDATE `detail` SET `name_detail`='".$_POST['name_detail']."', `manufacturer`='".$_POST['manufacturer']."', `car_model`='".$_POST['car_model']."', `power`='".$_POST['power']."', `sum_detail`='".$_POST['sum_detail']."', `kolvo`='".$_POST['kolvo']."', `couple_number`=".$_POST['couple_number']." WHERE `key_detail`=".$key_detail;
+		//echo "sql = ".$sql."<br/>";
+		@mysql_query($sql);
+	}
+}
+
+
+
+//echo "id = ".$key_detail."<br/>";
+
+$nr = @mysql_query("SELECT `name_detail`, `manufacturer`, `car_model`, `power`, `sum_detail`, `kolvo`, `couple_number` FROM `detail` WHERE `key_detail`=".$key_detail);
+if(count($nr) > 0)
+{
+	list($name_detail, $manufacturer,$car_model,$power, $sum_detail, $kolvo, $couple_number) =	@mysql_fetch_row($nr);
+}
+
+echo '
+		<br />';
+if(!$key_detail) echo "<h3>Добавить деталь</h3>";
+else echo "<h3>Редактировать деталь</h3>";
+
+echo '
+		<form method="POST" action="/edit_detail.html">
+			<table td="tab">
+				<tr>
+					<td class="tab_name">Наименование детали</td>
+					<td><input type="text" name="name_detail" value="'.$name_detail.'" /></td>
+				</tr>
+				
+				<tr>
+					<td  class="tab_name">Производительитель</td>
+					<td><input type="text" name="manufacturer" value="'.$manufacturer.'" /></td>
+				</tr>
+				
+			
+				
+				<tr>
+					<td class="tab_name">Марка автомобиля</td>
+					<td><input type="text" name="car_model" value="'.$car_model.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Мощность</td>
+					<td><input type="text" name="power" value="'.$power.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Цена товара</td>
+					<td><input type="text" name="sum_detail" value="'.$sum_detail.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Количество</td>
+					<td><input type="text" name="kolvo" value="'.$kolvo.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Номер счета</td>
+					<td><input type="text" name="couple_number" value="'.$couple_number.'" /></td>
+				</tr>
+				
+				<tr>
+					<td colspan="2" align="center" style="padding-top:20px;">
+						<input type="submit" name="submit" value="';
+if(!$key_detail) echo "Добавить";
+else echo "Сохранить";
+echo '" />';
+if($key_detail) echo '<input type="hidden" name="key_detail" value="'.$key_detail.'" />';
+echo '
+					</td>
+				</tr>
+			</table>
+		</form>
+	</body>
+</html>';
+
+@mysql_close($handler);
+?>

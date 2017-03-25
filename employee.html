@@ -1,0 +1,75 @@
+<html>
+	<head>
+		<title>Информация о сотруднике</title>
+		<style type="text/css">
+.tab_name
+{
+	padding-right:20px;
+	font-style:italic;
+}
+.tab_name a
+{
+	color:#ff0000;
+}
+#tabs div 
+{
+	padding:0 10px 0 0;
+	float:left;
+	clear:none;
+}
+#list div
+{
+	
+}
+		</style>
+	</head>
+	
+	<body>
+<?php
+include 'header.php';
+require 'db.php';
+
+$key_employee = false;
+if(isset($_GET['del']))
+{
+	$key_employee = $_GET['del']; 
+	@mysql_query("DELETE FROM `employee` WHERE `key_employee`=".$key_employee);
+	header('Location: /employee.html');
+	return;
+}
+
+
+$nr = @mysql_query("SELECT `key_employee`, `Full_name`, `INN`, `Position`, 'birthday' , 'children' , 'education' , 'sex' FROM `employee`"); 
+$num = @mysql_num_rows($nr);
+  
+?>
+		<br />
+		<h2>Информация о сотруднике</h2>
+		<h3>Список сотрудниковов (<?php echo $num; ?>)</h3>
+		<table id="list">
+		
+<?php
+for($i = 0; $i < $num; $i++)
+{
+	list($key_employee, $full_name, $inn, $position, $birthday, $children, $education, $sex) =
+		@mysql_fetch_row($nr);
+	echo '
+			<tr>
+				<td class="tab_name"><a href="/employee.html?del='.$key_employee.'">X</a></td>
+				<td><a href="/edit_employee.html?key_employee='.$key_employee.'">'.$full_name.'</a></td>
+			</tr>';
+}
+
+?>
+		</table>
+		<form method="GET" action="/edit_employee.html">
+			<div style="margin-top:20px;">
+				<input type="submit" name="submit" value="Добавить сотрудника" />
+			</div>
+		</form>
+	</body>
+</html>
+
+<?php
+@mysql_close($handler);
+?>

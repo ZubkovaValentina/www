@@ -1,0 +1,80 @@
+<html>
+	<head>
+		<title>Информация о клиенте</title>
+		<style type="text/css">
+.tab_name
+{
+	padding-right:20px;
+	font-style:italic;
+}
+.tab_name a
+{
+	color:#ff0000;
+}
+#tabs div 
+{
+	padding:0 10px 0 0;
+	float:left;
+	clear:none;
+}
+#list div
+{
+	
+}
+		</style>
+	</head>
+	
+	<body>
+<?php
+include 'header.php';
+require 'db.php';
+
+
+
+ini_set('show_errors', 1);
+
+$key_client = false;
+if(isset($_GET['del']))
+{
+	$key_client = $_GET['del']; 
+	$sql = "DELETE FROM `client` WHERE `key_client`=".$key_client;
+	mysql_query($sql) or die(mysql_error());
+	
+	//header('Location: /client.html');
+	return;
+}
+
+$nr = mysql_query("SELECT `key_client`, `full_name`, `address`, `mobile_phone`, `series_p` FROM `client`") or die(mysql_error());
+$num = mysql_num_rows($nr);
+  
+?>
+		<br />
+		<h2>Информация о клиенте</h2>
+		<h3>Список клиентов (<?php echo $num; ?>)</h3>
+		<table id="list">
+		
+<?php
+for($i = 0; $i < $num; $i++)
+{
+	list($key_client, $full_name, $addr, $mobile_phone, $serias_p) =
+		@mysql_fetch_row($nr);
+	echo '
+			<tr>
+				<td class="tab_name"><a href="/client.html?del='.$key_client.'" onclick="return confirm(\'Точно удалить?\'); return false;">X</a></td>
+				<td><a href="/edit_client.html?key_client='.$key_client.'">'.$full_name.'</a></td>
+			</tr>';
+}
+
+?>
+		</table>
+		<form method="GET" action="/edit_client.html">
+			<div style="margin-top:20px;">
+				<input type="submit" name="submit" value="Добавить клиента" />
+			</div>
+		</form>
+	</body>
+</html>
+
+<?php
+@mysql_close($handler);
+?>

@@ -1,0 +1,75 @@
+<html>
+	<head>
+		<title>Информация о поставщике</title>
+		<style type="text/css">
+.tab_name
+{
+	padding-right:20px;
+	font-style:italic;
+}
+.tab_name a
+{
+	color:#ff0000;
+}
+#tabs div 
+{
+	padding:0 10px 0 0;
+	float:left;
+	clear:none;
+}
+#list div
+{
+	
+}
+		</style>
+	</head>
+	
+	<body>
+<?php
+include 'header.php';
+require 'db.php';
+
+$key_provider = false;
+if(isset($_GET['del']))
+{
+	$key_provider = $_GET['del']; 
+	@mysql_query("DELETE FROM `provider` WHERE `key_provider`=".$key_provider);
+	header('Location: /provider.html');
+	return;
+}
+
+
+$nr = @mysql_query("SELECT `key_provider`, `name_organization`, `provider_address`, `mobile_phone`, `fax`,`INN` ,`detail`,`sum_detail` FROM `provider`");
+$num = @mysql_num_rows($nr);
+  
+?>
+		<br />
+		<h2>Информация о поставщике</h2>
+		<h3>Список компаний (<?php echo $num; ?>)</h3>
+		<table id="list">
+		
+<?php
+for($i = 0; $i < $num; $i++)
+{
+	list($key_provider, $name_organization, $provider_address, $mobile_phone, $fax, $INN, $detail, $sum_detail) =
+		@mysql_fetch_row($nr);
+	echo '
+			<tr>
+				<td class="tab_name"><a href="/provider.html?del='.$key_provider.'">X</a></td>
+				<td><a href="/edit_provider.html?key_provider='.$key_provider.'">'.$name_organization.'</a></td>
+			</tr>';
+}
+
+?>
+		</table>
+		<form method="GET" action="/edit_provider.html">
+			<div style="margin-top:20px;">
+				<input type="submit" name="submit" value="Добавить компанию" />
+			</div>
+		</form>
+	</body>
+</html>
+
+<?php
+@mysql_close($handler);
+?>

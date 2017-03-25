@@ -1,0 +1,109 @@
+<html>
+	<head>
+		<title>Информация о клиенте</title>
+		<style type="text/css">
+.tab_name
+{
+	padding-right:20px;
+	font-style:italic;
+}
+.tab_name a
+{
+	color:#ff0000;
+}
+#tabs div 
+{
+	padding:0 10px 0 0;
+	float:left;
+	clear:none;
+}
+#list div
+{
+	
+}
+		</style>
+	</head>
+	
+	<body>
+<?php
+include 'header.php';
+require 'db.php';
+
+$key_client = false;
+if(isset($_GET['key_client'])) $key_client=$_GET['key_client'];
+else if(isset($_POST['key_client'])) $key_client = $_POST['key_client'];
+
+$sql = "";
+if(isset($_POST['full_name']))
+{
+	if(!$key_client)
+	{
+		$sql = "INSERT INTO `client`(`full_name`, `address`, `mobile_phone`, `series_p`) VALUES('".$_POST['full_name']."', '".$_POST['address']."', '".$_POST['mobile_phone']."', '".$_POST['series_p']."')";
+		@mysql_query($sql) or die (mysql_error());
+		//echo "sql = ".$sql."<br/>";
+		header('Location: /client.html');
+		return;
+	}
+	else
+	{
+		$sql = "UPDATE `client` SET `full_name`='".$_POST['full_name']."', `address`='".$_POST['address']."', `mobile_phone`='".$_POST['mobile_phone']."', `series_p`=".$_POST['serias_p']." WHERE `key_client`=".$key_client;
+		//echo "sql = ".$sql."<br/>";
+		@mysql_query($sql);
+	}
+}
+
+
+
+//echo "id = ".$key_client."<br/>";
+
+$nr = @mysql_query("SELECT `full_name`, `address`, `mobile_phone`, `series_p` FROM `client` WHERE `key_client`=".$key_client);
+if(count($nr) > 0)
+{
+	list($full_name, $addr, $mobile_phone, $serias_p) =	@mysql_fetch_row($nr);
+}
+
+echo '
+		<br />';
+if(!$key_client) echo "<h3>Добавить клиента</h3>";
+else echo "<h3>Редактировать клиента</h3>";
+
+echo '
+		<form method="POST" action="/edit_client.html">
+			<table td="tab">
+				<tr>
+					<td class="tab_name">ФИО</td>
+					<td><input type="text" name="full_name" value="'.$full_name.'" /></td>
+				</tr>
+				
+				<tr>
+					<td  class="tab_name">Адрес</td>
+					<td><input type="text" name="address" value="'.$addr.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Телефон</td>
+					<td><input type="text" name="mobile_phone" value="'.$mobile_phone.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Серия/номер паспорта</td>
+					<td><input type="text" name="series_p" value="'.$serias_p.'" /></td>
+				</tr>
+				
+				<tr>
+					<td colspan="2" align="center" style="padding-top:20px;">
+						<input type="submit" name="submit" value="';
+if(!$key_client) echo "Добавить";
+else echo "Сохранить";
+echo '" />';
+if($key_client) echo '<input type="hidden" name="key_client" value="'.$key_client.'" />';
+echo '
+					</td>
+				</tr>
+			</table>
+		</form>
+	</body>
+</html>';
+
+@mysql_close($handler);
+?>

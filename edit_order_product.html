@@ -1,0 +1,167 @@
+<html>
+	<head>
+		<title>Заказ</title>
+		<style type="text/css">
+.tab_name
+{
+	padding-right:20px;
+	font-style:italic;
+}
+.tab_name a
+{
+	color:#ff0000;
+}
+#tabs div 
+{
+	padding:0 10px 0 0;
+	float:left;
+	clear:none;
+}
+#list div
+{
+	
+}
+		</style>
+	</head>
+	
+	<body>
+<?php
+include 'header.php';
+require 'db.php';
+
+$key_order = false;
+if(isset($_GET['key_order'])) $key_order=$_GET['key_order'];
+else if(isset($_POST['key_order'])) $key_order = $_POST['key_order'];
+
+$key_detail_values = '';
+$q = mysql_query ('SELECT key_detail, name_detail FROM detail ORDER BY name_detail');
+while ($r = mysql_fetch_row ($q))
+{
+	list ($d_id, $d_name) = $r;
+	$key_detail_values .= '<option value="'.$d_id.'">'.$d_name.'</option>';
+}
+
+$clients = '';
+$q = mysql_query ('SELECT key_client, full_name FROM client ORDER BY full_name');
+while ($r = mysql_fetch_row ($q))
+{
+	list ($d_id, $d_name) = $r;
+	$clients .= '<option value="'.$d_id.'">'.$d_name.'</option>';
+}
+
+$error = false;
+$sql = "";
+if(isset($_POST['order_number']))
+{
+	$order_number = $_POST['order_number'];
+	$date = $_POST['date'];
+	$sum = $_POST['sum'];
+	$client = false;
+	if(isset($_POST['clients'])) $client = $_POST['clients'][0];
+	$key_detail = false;
+	if(isset($_POST['key_detail'])) $key_detail = $_POST['key_detail'];
+	
+	if(!$key_detail) $error = 'Товары';
+	if(!$client) $error = 'Клиент';
+	if(!$sum) $error = 'Сумма';
+	if(!$date) $error = 'Дата';
+	if(!$order_number) $error = 'Номер заказа';
+	
+	
+	if(!$key_order)
+	{
+		$sql = "INSERT INTO order_product(order_number, `date`, sum, key_client) VALUES(".$order_number.", '".$date."', ".$sum.", ".$client.")";
+		mysql_query($sql) or die(mysql_error());
+		$id = mysql_insert_id();
+	
+		$sql = "INSERT INTO detail_order_product(key_detail, key_order) VALUES";
+
+		for($i = 0; $i < count($key_detail); ++$i)
+		{
+			$sql .= '('.$key_detail[$i].', '.$id.')';
+			if($i < (count($key_detail)-1)) $sql .= ', ';
+		}
+		
+		mysql_query($sql) or die(mysql_error());
+
+		header('Location: /order_product.html');
+		return;
+	}
+	else
+	{
+		$sql = "UPDATE `order_product` SET `order_number`='".$_POST['order_number']."', `date`='".$_POST['date']."', `sum`='".$_POST['sum']."', `key_client`=".$_POST['key_client']." WHERE `key_order`=".$key_order;
+		//echo "sql = ".$sql."<br/>";
+		@mysql_query($sql);
+	}
+	
+}
+else
+{
+	$nr = @mysql_query("SELECT `order_number`, `date`, `sum`, `key_client` FROM `order_product` WHERE `key_order`=".$key_order);
+	if(count($nr) > 0)
+	{
+		list($order_number, $date, $sum, $key_client) =	@mysql_fetch_row($nr);
+	}
+}
+echo '
+		<br />';
+if(!$key_order) echo "<h3>Добавить заказ</h3>";
+else echo "<h3>Редактировать заказ</h3>";
+
+echo '
+		<form method="POST" action="/edit_order_product.html">
+			<table td="tab">
+				<tr>
+					<td class="tab_name">Номер заказа</td>
+					<td><input type="text" name="order_number" value="'.$order_number.'" /></td>
+				</tr>
+				
+				<tr>
+					<td  class="tab_name">Дата</td>
+					<td><input type="text" name="date" value="'.$date.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Сумма</td>
+					<td><input type="text" name="sum" value="'.$sum.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Клиент</td>					
+					<td>
+						<select name="clients[]" size="6">
+							'.$clients.'
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td class="tab_name">Товары</td>
+					<td>
+						<select multiple="multiple" name="key_detail[]" size="6">
+							'.$key_detail_values.'
+						</select>
+					</td>
+				</tr>';
+if($error) echo '		
+				<tr>
+					<td colspan="2" style="color:#ff0000;font-style:bold;padding-top:16px;">Не заполнено обязательное поле "'.$error.'"!</td>
+				</tr>';
+				
+echo '
+				<tr>
+					<td colspan="2" align="center" style="padding-top:20px;">
+						<input type="submit" name="submit" value="';
+if(!$key_order) echo "Добавить";
+else echo "Сохранить";
+echo '" />';
+if($key_order) echo '<input type="hidden" name="key_order" value="'.$key_order.'" />';
+echo '
+					</td>
+				</tr>
+			</table>
+		</form>
+	</body>
+</html>';
+
+@mysql_close($handler);
+?>

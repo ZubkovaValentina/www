@@ -1,0 +1,75 @@
+<html>
+	<head>
+		<title>Детали</title>
+		<style type="text/css">
+.tab_name
+{
+	padding-right:20px;
+	font-style:italic;
+}
+.tab_name a
+{
+	color:#ff0000;
+}
+#tabs div 
+{
+	padding:0 10px 0 0;
+	float:left;
+	clear:none;
+}
+#list div
+{
+	
+}
+		</style>
+	</head>
+	
+	<body>
+<?php
+include 'header.php';
+require 'db.php';
+
+$key_detail = false;
+if(isset($_GET['del']))
+{
+	$key_detail = $_GET['del']; 
+	@mysql_query("DELETE FROM `detail` WHERE `key_detail`=".$key_detail);
+	header('Location: /detail.html');
+	return;
+}
+
+
+$nr = @mysql_query("SELECT `key_detail`, `name_detail`, `manufacturer`,`car_model`,`power`,`sum_detail`,`kolvo`,`couple_number` FROM `detail`");
+$num = @mysql_num_rows($nr);
+  
+?>
+		<br />
+		<h2>Детали</h2>
+		<h3>Список деталей (<?php echo $num; ?>)</h3>
+		<table id="list">
+		
+<?php
+for($i = 0; $i < $num; $i++)
+{
+	list($key_detail, $name_detail, $manufacturer, $car_model, $power, $sum_detail, $kolvo, $couple_number) =
+		@mysql_fetch_row($nr);
+	echo '
+			<tr>
+				<td class="tab_name"><a href="/detail.html?del='.$key_detail.'">X</a></td>
+				<td><a href="/edit_detail.html?key_detail='.$key_detail.'">'.$name_detail.'</a></td>
+			</tr>';
+}
+
+?>
+		</table>
+		<form method="GET" action="/edit_detail.html">
+			<div style="margin-top:20px;">
+				<input type="submit" name="submit" value="Добавить деталь" />
+			</div>
+		</form>
+	</body>
+</html>
+
+<?php
+@mysql_close($handler);
+?>

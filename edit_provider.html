@@ -1,0 +1,122 @@
+<html>
+	<head>
+		<title>Информация о поставщике</title>
+		<style type="text/css">
+.tab_name
+{
+	padding-right:20px;
+	font-style:italic;
+}
+.tab_name a
+{
+	color:#ff0000;
+}
+#tabs div 
+{
+	padding:0 10px 0 0;
+	float:left;
+	clear:none;
+}
+#list div
+{
+	
+}
+		</style>
+	</head>
+	
+	<body>
+<?php
+include 'header.php';
+require 'db.php';
+
+$key_provider = false;
+if(isset($_GET['key_provider'])) $key_provider=$_GET['key_provider'];
+else if(isset($_POST['key_provider'])) $key_provider = $_POST['key_provider'];
+
+$sql = "";
+if(isset($_POST['name_organization']))
+{
+	if(!$key_provider)
+	{
+		$sql = "INSERT INTO `provider`(`name_organization`, `provider_address`, `mobile_phone`, `fax`, `INN`,`detail`,`sum_detail`) VALUES('".$_POST['name_organization']."', '".$_POST['provider_address']."', '".$_POST['mobile_phone']."','".$_POST['fax']."','".$_POST['INN']."','".$_POST['detail']."', ".$_POST['sum_detail'].")";
+		@mysql_query($sql);
+		//echo "sql = ".$sql."<br/>";
+		header('Location: /provider.html');
+		return;
+	}
+	else
+	{
+		$sql = "UPDATE `provider` SET `name_organization`='".$_POST['name_organization']."', `provider_address`='".$_POST['provider_address']."', `mobile_phone`='".$_POST['mobile_phone']."',`fax`='".$_POST['fax']."',`INN`='".$_POST['INN']."',`detail`='".$_POST['detail']."', `sum_detail`=".$_POST['sum_detail']." WHERE `key_provider`=".$key_provider;
+		//echo "sql = ".$sql."<br/>";
+		@mysql_query($sql);
+	}
+}
+
+
+
+//echo "id = ".$key_provider."<br/>";
+
+$nr = @mysql_query("SELECT `name_organization`, `provider_address`, `mobile_phone`, `fax`, `INN`, `detail`, `sum_detail` FROM `provider` WHERE `key_provider`=".$key_provider);
+if(count($nr) > 0)
+{
+	list($name_organization, $provider_address, $mobile_phone,$fax, $INN,$detail,$sum_detail) =	@mysql_fetch_row($nr);
+}
+
+echo '
+		<br />';
+if(!$key_provider) echo "<h3>Добавить компанию</h3>";
+else echo "<h3>Редактировать компанию</h3>";
+
+echo '
+		<form method="POST" action="/edit_provider.html">
+			<table td="tab">
+				<tr>
+					<td class="tab_name">Название компании</td>
+					<td><input type="text" name="name_organization" value="'.$name_organization.'" /></td>
+				</tr>
+				
+				<tr>
+					<td  class="tab_name">Адрес</td>
+					<td><input type="text" name="provider_address" value="'.$provider_address.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Телефон</td>
+					<td><input type="text" name="mobile_phone" value="'.$mobile_phone.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Факс</td>
+					<td><input type="text" name="fax" value="'.$fax.'" /></td>
+				</tr>
+				<tr>
+					<td class="tab_name">ИНН</td>
+					<td><input type="text" name="INN" value="'.$INN.'" /></td>
+				</tr>
+				<tr>
+					<td class="tab_name">Товар</td>
+					<td><input type="text" name="detail" value="'.$detail.'" /></td>
+				</tr>
+				<tr>
+					<td class="tab_name">Цена товара</td>
+					<td><input type="text" name="sum_detail" value="'.$sum_detail.'" /></td>
+				</tr>
+				
+				
+				<tr>
+					<td colspan="2" align="center" style="padding-top:20px;">
+						<input type="submit" name="submit" value="';
+if(!$key_provider) echo "Добавить";
+else echo "Сохранить";
+echo '" />';
+if($key_provider) echo '<input type="hidden" name="key_provider" value="'.$key_provider.'" />';
+echo '
+					</td>
+				</tr>
+			</table>
+		</form>
+	</body>
+</html>';
+
+@mysql_close($handler);
+?>

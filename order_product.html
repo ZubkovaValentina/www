@@ -1,0 +1,75 @@
+<html>
+	<head>
+		<title>Заказ</title>
+		<style type="text/css">
+.tab_name
+{
+	padding-right:20px;
+	font-style:italic;
+}
+.tab_name a
+{
+	color:#ff0000;
+}
+#tabs div 
+{
+	padding:0 10px 0 0;
+	float:left;
+	clear:none;
+}
+#list div
+{
+	
+}
+		</style>
+	</head>
+	
+	<body>
+<?php
+include 'header.php';
+require 'db.php';
+
+$key_order = false;
+if(isset($_GET['del']))
+{
+	$key_order = $_GET['del']; 
+	@mysql_query("DELETE FROM `order_product` WHERE `key_order`=".$key_order);
+	header('Location: /order_product.html');
+	return;
+}
+
+
+$nr = @mysql_query("SELECT `key_order`, `order_number`, `date`, `sum`, `key_client` FROM `order_product`");
+$num = @mysql_num_rows($nr);
+  
+?>
+		<br />
+		<h2>Заказ</h2>
+		<h3>Список Заказов (<?php echo $num; ?>)</h3>
+		<table id="list">
+		
+<?php
+for($i = 0; $i < $num; $i++)
+{
+	list($key_order, $order_number, $date, $sum, $key_client) =
+		@mysql_fetch_row($nr);
+	echo '
+			<tr>
+				<td class="tab_name"><a href="/order_product.html?del='.$key_order.'">X</a></td>
+				<td><a href="/edit_order_product.html?key_order='.$key_order.'">'.$order_number.'</a></td>
+			</tr>';
+}
+
+?>
+		</table>
+		<form method="GET" action="/edit_order_product.html">
+			<div style="margin-top:20px;">
+				<input type="submit" name="submit" value="Добавить заказ" />
+			</div>
+		</form>
+	</body>
+</html>
+
+<?php
+@mysql_close($handler);
+?>

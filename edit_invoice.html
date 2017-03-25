@@ -1,0 +1,124 @@
+<html>
+	<head>
+		<title>Накладная</title>
+		<style type="text/css">
+.tab_name
+{
+	padding-right:20px;
+	font-style:italic;
+}
+.tab_name a
+{
+	color:#ff0000;
+}
+#tabs div 
+{
+	padding:0 10px 0 0;
+	float:left;
+	clear:none;
+}
+#list div
+{
+	
+}
+		</style>
+	</head>
+	
+	<body>
+<?php
+include 'header.php';
+require 'db.php';
+
+$key_invoice = false;
+if(isset($_GET['key_invoice'])) $key_invoice=$_GET['key_invoice'];
+else if(isset($_POST['key_invoice'])) $key_invoice = $_POST['key_invoice'];
+
+$sql = "";
+if(isset($_POST['invoice_number']))
+{
+	if(!$key_invoice)
+	{
+		$sql = "INSERT INTO `invoice`(`invoice_number`, `date`, `key_client`, `sum`, `accepted`, `passed`, `detail`) VALUES('".$_POST['invoice_number']."', '".$_POST['date']."', '".$_POST['key_client']."','".$_POST['sum']."','".$_POST['accepted']."','".$_POST['passed']."', ".$_POST['detail'].")";
+		@mysql_query($sql);
+		//echo "sql = ".$sql."<br/>";
+		header('Location: /invoice.html');
+		return;
+	}
+	else
+	{
+		$sql = "UPDATE `invoice` SET `invoice_number`='".$_POST['invoice_number']."', `date`='".$_POST['date']."', `key_client`='".$_POST['key_client']."', `sum`='".$_POST['sum']."', `accepted`='".$_POST['accepted']."', `passed`='".$_POST['passed']."', `detail`=".$_POST['detail']." WHERE `key_invoice`=".$key_invoice;
+		//echo "sql = ".$sql."<br/>";
+		@mysql_query($sql);
+	}
+}
+
+
+
+//echo "id = ".$key_invoice."<br/>";
+
+$nr = @mysql_query("SELECT `invoice_number`, `date`, `key_client`, `sum`, `accepted`, `passed`, `detail` FROM `invoice` WHERE `key_invoicet`=".$key_invoice);
+if(count($nr) > 0)
+{
+	list($invoice_number, $date, $key_client, $sum, $accepted, $passed, $detail) =	@mysql_fetch_row($nr);
+}
+
+echo '
+		<br />';
+if(!$key_invoice) echo "<h3>Добавить накладную</h3>";
+else echo "<h3>Редактировать накладную</h3>";
+
+echo '
+		<form method="POST" action="/edit_invoice.html">
+			<table td="tab">
+				<tr>
+					<td class="tab_name">Номер накладной</td>
+					<td><input type="text" name="invoice_number" value="'.$invoice_number.'" /></td>
+				</tr>
+				
+				<tr>
+					<td  class="tab_name">Дата</td>
+					<td><input type="text" name="date" value="'.$date.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Клиент</td>
+					<td><input type="text" name="key_client" value="'.$key_client.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Сумма</td>
+					<td><input type="text" name="sum" value="'.$sum.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Принял</td>
+					<td><input type="text" name="accepted" value="'.$accepted.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Сдал</td>
+					<td><input type="text" name="passed" value="'.$passed.'" /></td>
+				</tr>
+				
+				<tr>
+					<td class="tab_name">Товар</td>
+					<td><input type="text" name="detail" value="'.$detail.'" /></td>
+				</tr>
+				
+				<tr>
+					<td colspan="2" align="center" style="padding-top:20px;">
+						<input type="submit" name="submit" value="';
+if(!$key_invoice) echo "Добавить";
+else echo "Сохранить";
+echo '" />';
+if($key_invoice) echo '<input type="hidden" name="key_invoice" value="'.$key_invoice.'" />';
+echo '
+					</td>
+				</tr>
+			</table>
+		</form>
+	</body>
+</html>';
+
+@mysql_close($handler);
+?>

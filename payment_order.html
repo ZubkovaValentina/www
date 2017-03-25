@@ -1,0 +1,75 @@
+<html>
+	<head>
+		<title>Платежные поручения</title>
+		<style type="text/css">
+.tab_name
+{
+	padding-right:20px;
+	font-style:italic;
+}
+.tab_name a
+{
+	color:#ff0000;
+}
+#tabs div 
+{
+	padding:0 10px 0 0;
+	float:left;
+	clear:none;
+}
+#list div
+{
+	
+}
+		</style>
+	</head>
+	
+	<body>
+<?php
+include 'header.php';
+require 'db.php';
+
+$key_payment = false;
+if(isset($_GET['del']))
+{
+	$key_payment = $_GET['del']; 
+	@mysql_query("DELETE FROM `payment_order` WHERE `key_payment`=".$key_payment);
+	header('Location: /payment_order.html');
+	return;
+}
+
+
+$nr = @mysql_query("SELECT `key_payment`, `payment_number`, `date`, `detail`, `kolvo`, `sum` FROM `payment_order`");
+$num = @mysql_num_rows($nr);
+  
+?>
+		<br />
+		<h2>Платежные поручения</h2>
+		<h3>Список поручений (<?php echo $num; ?>)</h3>
+		<table id="list">
+		
+<?php
+for($i = 0; $i < $num; $i++)
+{
+	list($key_payment, $payment_number, $date, $detail, $kolvo, $sum) =
+		@mysql_fetch_row($nr);
+	echo '
+			<tr>
+				<td class="tab_name"><a href="/payment_order.html?del='.$key_payment.'">X</a></td>
+				<td><a href="/edit_payment_order.html?key_payment='.$key_payment.'">'.$payment_number.'</a></td>
+			</tr>';
+}
+
+?>
+		</table>
+		<form method="GET" action="/edit_payment_order.html">
+			<div style="margin-top:20px;">
+				<input type="submit" name="submit" value="Добавить поручение" />
+			</div>
+		</form>
+	</body>
+</html>
+
+<?php
+@mysql_close($handler);
+?>
